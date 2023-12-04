@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# ------------------------------------------------------------------
+# Copyright (C) 2023 Kristofer Tingdahl
+# Licenced under the MIT license
+# ------------------------------------------------------------------
+
+if [ "$#" -ne 1 ]; then
+    echo "Syntax: $0 <usn>"
+    exit 1
+fi
+
+TMPDIR="$(mktemp -d)"
+trap 'rm -rf -- "$TMPDIR"' EXIT
+
+landscape-api get-csv-compliance-data --max-days 3650 --by-cve false > $TMPDIR/raw
+cat $TMPDIR/raw | sed 's/\\r\\n/\n/g' | awk -f filter-column.awk colname=$1
